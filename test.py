@@ -1,8 +1,11 @@
 import speech_recognition as sr
-import pyttsx3
+import pygame
+import time
 
+pygame.mixer.init()
 
 def recognize_speech():
+
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print("Скажіть щось...")
@@ -13,18 +16,21 @@ def recognize_speech():
             return text.lower()
         except sr.UnknownValueError:
             print("Не вдалося розпізнати голос.")
+            play_audio_response("audio/tesp.mp3")
         except sr.RequestError as e:
             print(f"Помилка сервісу: {e}")
+            play_audio_response("audio/tesp.mp3")
+
+def play_audio_response(file_path):
+
+    pygame.mixer.music.load(file_path)
+    pygame.mixer.music.play()
 
 
-def speak_text(text):
-    engine = pyttsx3.init()
-    engine.say(text)
-    engine.runAndWait()
-
+    while pygame.mixer.music.get_busy():
+        time.sleep(0.1)
 
 def dialog_flow(user_input):
-    # Ключові слова для різних сценаріїв
     positive_keywords = [
         "не надо блокировать", "согласен", "да", "конечно", "буду пользоваться",
         "не блокируйте", "продлевать", "продлевайте", "нет планирую",
@@ -52,8 +58,10 @@ def dialog_flow(user_input):
     visit_office_keywords = [
         "я поеду в отделение", "надо ехать в отделение", "я заеду к вам", "я приеду к вам", "я поеду к вам",
         "в отделение", "собираюсь посетить отделение", "планирую приехать", "хочу заехать", "мне нужно в отделение",
-        "когда могу приехать", "когда открыто отделение", "какие часы работы", "как доехать до отделения", "адрес отделения",
-        "можно ли приехать", "я на пути к вам", "нужно зайти в отделение", "как долго там буду", "могу ли записаться на время",
+        "когда могу приехать", "когда открыто отделение", "какие часы работы", "как доехать до отделения",
+        "адрес отделения",
+        "можно ли приехать", "я на пути к вам", "нужно зайти в отделение", "как долго там буду",
+        "могу ли записаться на время",
         "есть ли очередь", "какие документы взять", "нужна ли предварительная запись"
     ]
 
@@ -115,74 +123,75 @@ def dialog_flow(user_input):
         "это чужой телефон", "нет владельца", "владелец отошел"
     ]
 
-    # Відповіді на кожен сценарій
     if any(keyword in user_input for keyword in positive_keywords):
-        speak_text("Спасибо, что остаетесь с нами. Ваш договор успешно продлен.")
+        play_audio_response("audio/ANSWER YES.mp3")
         return "Позитивна відповідь оброблена"
 
     elif any(keyword in user_input for keyword in more_info_keywords):
-        speak_text("Могу предоставить дополнительную информацию или передать вас на специалиста.")
+        play_audio_response("audio/I NEED MORE INFORMATION .mp3")
         return "Запит додаткової інформації"
 
     elif any(keyword in user_input for keyword in no_notification_keywords):
-        speak_text("Извините за неудобства. Мы постараемся исправить ситуацию и будем уведомлять вас заранее.")
+        play_audio_response("audio/tesp.mp3")
         return "Запит на попередження"
 
     elif any(keyword in user_input for keyword in visit_office_keywords):
-        speak_text("Вы можете посетить ближайшее отделение для уточнения деталей. Хотите узнать адрес или график работы?")
+        play_audio_response("audio/tesp.mp3")
         return "Запит на візит до відділення"
 
     elif any(keyword in user_input for keyword in no_use_keywords):
-        speak_text("Если номер вам больше не нужен, можем обсудить варианты отключения или перенаправления номера.")
+        play_audio_response("audio/tesp.mp3")
         return "Невикористання номера"
 
     elif any(keyword in user_input for keyword in deactivate_keywords):
-        speak_text("Понимаю ваше решение. Могу помочь с деактивацией. Соединить вас с оператором для оформления заявки?")
+        play_audio_response("audio/DEAKTIVATE .mp3")
         return "Запит на деактивацію"
 
     elif any(keyword in user_input for keyword in inconvenient_keywords):
-        speak_text("Извините за неудобства. Могу перезвонить в удобное время или вы можете обратиться к нам позже.")
+        play_audio_response("audio/CANT SPEAK.mp3")
         return "Перенесення розмови"
 
     elif any(keyword in user_input for keyword in explanation_keywords):
-        speak_text("Продление договора — это автоматическое продление услуг, чтобы номер оставался активным. Нужны подробности?")
+        play_audio_response("audio/tesp.mp3")
         return "Пояснення процесу"
 
     elif any(keyword in user_input for keyword in suspicion_keywords):
-        speak_text("Мы используем стандартные номера. Если у вас возникли сомнения, можете проверить номер на нашем сайте.")
+        play_audio_response("audio/tesp.mp3")
         return "Виникли підозри"
 
     elif any(keyword in user_input for keyword in repeat_keywords):
-        speak_text("Понимаю, что это может показаться повторением. Уточню детали по вашему вопросу.")
+        play_audio_response("audio/tesp.mp3")
         return "Повторення питання"
 
     elif any(keyword in user_input for keyword in verification_keywords):
-        speak_text("Я оператор компании МТС. Вы можете проверить мой номер и информацию, позвонив на горячую линию.")
+        play_audio_response("audio/tesp.mp3")
         return "Підтвердження оператора"
 
     elif any(keyword in user_input for keyword in fraud_keywords):
-        speak_text("Извините, если наше общение вызвало у вас такое ощущение. Могу соединить вас с менеджером для уточнения.")
+        play_audio_response("audio/SCAM COLEGA.mp3")
         return "Запит про шахрайство"
 
     elif any(keyword in user_input for keyword in not_present_keywords):
-        speak_text("Понял, что сейчас абонента нет на месте. Хотите оставить сообщение или я могу перезвонить позже?")
+        play_audio_response("audio/THE HUMAN NOT HERE .mp3")
         return "Немає абонента на місці"
 
     else:
-        speak_text("Дякую за ваші відповіді. Якщо буде потрібно, можу передати вас на менеджера.")
+        play_audio_response("audio/QUESTION X.mp3")
         return "Невідома відповідь"
 
 def main():
-    # Привітання та основне питання
-    speak_text("А")
+    play_audio_response("audio/SOUND 1 .mp3")
+    play_audio_response("audio/REGULAR QUESTION .mp3")
 
-    # Отримання відповіді від користувача
+    # Чекаємо завершення аудіо перед розпізнаванням мови
+    while pygame.mixer.music.get_busy():
+        time.sleep(0.1)
+
     user_input = recognize_speech()
 
     if user_input:
         result = dialog_flow(user_input)
         print("Результат: ", result)
-
 
 if __name__ == "__main__":
     main()
